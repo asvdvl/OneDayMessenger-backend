@@ -1,7 +1,7 @@
 <?php
 #header('Content-Type: application/json');
 #переменныне
-$received_data_from_client = [
+$received_data = [
 'imei' => ''
 ];
 $send_data_array = [ 
@@ -13,13 +13,12 @@ $send_data_array = [
 ];
 
 #получение данных от клиента
-
 if($_SERVER['REQUEST_METHOD'] == "GET")
 {
 	if (isset($_GET['imei']))
 	{
-		$received_data_from_client['imei'] = $_GET['imei'];
-		$received_data_from_client['user_uid'] = sha1($received_data_from_client['imei']);
+		$received_data['imei'] = $_GET['imei'];
+		$send_data_array['user_uid'] = $received_data['user_uid'] = sha1($received_data['imei']);
 	}
 	else
 	{
@@ -33,35 +32,51 @@ else
 
 #подкл. к бд
 $bd_link = mysqli_connect("localhost", "messenger_backend_worker", "B9Z1VPNuvljoGTcm", "messenger_db");
-if (!isset($bd_link) || $bd_link == false){$send_data_array['error'] = 100;}
+if (!isset($bd_link) || $bd_link == false)
+	{
+		$send_data_array['error'] = 100;
+	}
 
 #поиск 
-$result = mysqli_query($bd_link, "SELECT * FROM `profile_users_data`");
-var_dump($result);
+$sql_query = "SELECT `user_id`, `user_uid`, `user_nickname`, `URL_image` FROM `profile_users_data` WHERE `user_uid` = ".$received_data['user_uid'];
+echo($sql_query);
+$result = mysqli_query($bd_link, $sql_query);
+if($result)
+{
+	while($row = mysqli_fetch_array($result)) {
+    $rows[] = $row;
+	}
 
+	print_r($rows);
+	#var_dump(mysqli_fetch_array($result, MYSQLI_ASSOC));
+}
+else
+{
+	$send_data_array['new_profile'] = true;
 
-
-
-
-
+	#добавление клиента
+}
 
 
 #обнуляем отправляемые данные клиенту в случае ошибки при обработке запроса. (просто является копией значений по умолчанию)
-$send_data_array['new_profile'] = false;
-$send_data_array['user_uid'] = '';
-$send_data_array['user_nickname'] = '';
-$send_data_array['URL_image'] = '';
-
-
+/*
+if($send_data_array['error'] != 0)
+{
+	$send_data_array['new_profile'] = false;
+	$send_data_array['user_uid'] = '';
+	$send_data_array['user_nickname'] = '';
+	$send_data_array['URL_image'] = '';
+}
+*/
 
 $ext = (string)json_encode($send_data_array);
-#echo $ext;
+echo $ext;
 
 
 
 
 
-
+#жсон декодер
 #$ext = json_decode($ext, true);
 #var_dump($ext);
 
