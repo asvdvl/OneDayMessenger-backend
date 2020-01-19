@@ -1,18 +1,32 @@
 <?php
 #header('Content-Type: application/json');
+header('Content-Type: text/plain'); 
 #переменныне
 $received_data = [
-'imei' => ''
+'imei' => '',
+'user_uid' => ''
 ];
 $send_data_array = [ 
-'error' => 0,
+'error' => "0",
 'new_profile' => false,
+'user_id' => '',
 'user_uid' => '',
 'user_nickname' => '',
 'URL_image' => ''
 ];
 
-#получение данных от клиента
+#функция не позволяющая перезаписать повторно номер ошибки, нужна для предотвращения 
+function setError($errorCode)
+{
+	global $send_data_array;
+	if ($send_data_array['error'] == "0")
+	{
+		$send_data_array['error'] = (string)$errorCode;
+	}
+}
+
+
+###получение данных от клиента
 if($_SERVER['REQUEST_METHOD'] == "GET")
 {
 	if (isset($_GET['imei']))
@@ -22,40 +36,52 @@ if($_SERVER['REQUEST_METHOD'] == "GET")
 	}
 	else
 	{
-		$send_data_array['error'] = 1;
+		setError(1);
 	}
 }
 else
 {
-	$send_data_array['error'] = 2;
+	setError(2);
 }
 
-#подкл. к бд
+###подкл. к бд
+try
+{
 $bd_link = mysqli_connect("localhost", "messenger_backend_worker", "B9Z1VPNuvljoGTcm", "messenger_db");
-if (!isset($bd_link) || $bd_link == false)
+}
+catch (Exception $e)
+{
+	setError("100.".mysqli_connect_errno());
+}
+
+###поиск 
+try
+{
+	#$sql_query = "SELECT `user_id`, `user_uid`, `user_nickname`, `URL_image` FROM `profile_users_data` WHERE `user_uid` = '"."6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2"."'";	#work
+	$sql_query = "SELECT `user_id`, `user_nickname`, `URL_image` FROM `profile_users_data` WHERE `user_uid` = '".$received_data['user_uid']."'";	#finaly work variant
+	$result = mysqli_query($bd_link, $sql_query);
+	$result_parsing = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+	if($result_parsing)
 	{
-		$send_data_array['error'] = 100;
+
+		$send_data_array['user_id'] = $result_parsing['user_id'];
+		$send_data_array['user_nickname'] = $result_parsing['user_nickname'];
+		$send_data_array['URL_image'] = $result_parsing['URL_image'];
+		#var_dump($result_parsing);
 	}
-
-#поиск 
-$sql_query = "SELECT `user_id`, `user_uid`, `user_nickname`, `URL_image` FROM `profile_users_data` WHERE `user_uid` = ".$received_data['user_uid'];
-echo($sql_query);
-$result = mysqli_query($bd_link, $sql_query);
-if($result)
-{
-	while($row = mysqli_fetch_array($result)) {
-    $rows[] = $row;
+	else
+	{
+		$send_data_array['new_profile'] = true;
+	
+		#добавление клиента
 	}
-
-	print_r($rows);
-	#var_dump(mysqli_fetch_array($result, MYSQLI_ASSOC));
 }
-else
+catch (Exception $e)
 {
-	$send_data_array['new_profile'] = true;
-
-	#добавление клиента
+	setError("101.".mysqli_connect_errno());
 }
+
 
 
 #обнуляем отправляемые данные клиенту в случае ошибки при обработке запроса. (просто является копией значений по умолчанию)
@@ -63,6 +89,7 @@ else
 if($send_data_array['error'] != 0)
 {
 	$send_data_array['new_profile'] = false;
+	$send_data_array['user_id'] = '';
 	$send_data_array['user_uid'] = '';
 	$send_data_array['user_nickname'] = '';
 	$send_data_array['URL_image'] = '';
@@ -73,36 +100,7 @@ $ext = (string)json_encode($send_data_array);
 echo $ext;
 
 
-
-
-
 #жсон декодер
 #$ext = json_decode($ext, true);
 #var_dump($ext);
-
-
-
-/*							мини документация
-
-	требуемые данные от клиента
-	imei - imei устройства
-	!!!	данные отдаем серверу через GET запрос. 
-
-	отправляемые данные клиенту
-	error 			[int]		- сообщаем клиенту статус "работы бекэнда". 0 - все хорошо. остальные коды описаны в следующем блоке. WARNING!!! коды могут менятся/добавлятся/удалятся к каждой новой верии этого документа WARNING!!!
-	new_profile		[bool]		- имеет значение true если профиль только создан и нуждается в редактировании.
-	user_uid		[int]		- пользовательсний id. также используется для аунтификации при большинстве запросов
-	user_nickname	[string]	- пользовательский никнейм
-	URL_image		[string]	- ссылка на картинку аватара пользователя
-
-	коды ошибок
-	0 		-- все ок
-	##	1-99 ошибки при приеме данных
-	1 		-- отсутствуют требуемые параметры необходимые для обработки.
-	2		-- неправильно отдан запрос. проверьте какой метод отправки вы используете.
-	##	100-199 ошибки при работе с бд.
-	100 	-- бд не доступно или произошла ошибка при аунтификации.
-
-
-*/
 ?>
