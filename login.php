@@ -8,6 +8,7 @@ $send_data_array = [
 'user_uid' => '',
 'user_nickname' => '',
 'URL_image' => ''
+'APIVersion' => 'v0.1'
 ];
 
 $defaultValuesForRegistraton = [
