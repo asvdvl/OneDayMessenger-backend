@@ -7,13 +7,13 @@ $send_data_array = [
 'user_id' => '',
 'user_uid' => '',
 'user_nickname' => '',
-'URL_image' => ''
+'URL_avatarImage' => '',
 'APIVersion' => 'v0.1'
 ];
 
 $defaultValuesForRegistraton = [
 'nickname' => 'Anon_',
-'URL_image' => 'https://example.com/imageDefault.PNG'
+'URL_avatarImage' => 'https://example.com/imageDefault.PNG'
 ];
 
 #функция не позволяющая перезаписать повторно номер ошибки, нужна для предотвращения 
@@ -66,7 +66,7 @@ catch (Exception $e)
 ###поиск 
 try
 {
-	$sql_query = "SELECT `user_id`, `user_nickname`, `URL_image` FROM `profile_users_data` WHERE `user_uid` = '".$send_data_array['user_uid']."'";
+	$sql_query = "SELECT `user_id`, `user_nickname`, `URL_avatarImage` FROM `profile_users_data` WHERE `user_uid` = '".$send_data_array['user_uid']."'";
 	$result = mysqli_query($bd_link, $sql_query);
 	$result_parsing = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
@@ -74,7 +74,7 @@ try
 	{
 		$send_data_array['user_id'] = $result_parsing['user_id'];
 		$send_data_array['user_nickname'] = $result_parsing['user_nickname'];
-		$send_data_array['URL_image'] = $result_parsing['URL_image'];
+		$send_data_array['URL_avatarImage'] = $result_parsing['URL_avatarImage'];
 	}
 	else
 	{
@@ -95,9 +95,9 @@ try
 		#
 		$send_data_array['user_id'] = $max_id;
 		$send_data_array['user_nickname'] = $defaultValuesForRegistraton['nickname'].$max_id;
-		$send_data_array['URL_image'] = $defaultValuesForRegistraton['URL_image'];
+		$send_data_array['URL_avatarImage'] = $defaultValuesForRegistraton['URL_avatarImage'];
 
-		$sql_query = "INSERT INTO `profile_users_data` (`user_id`, `user_uid`, `user_nickname`, `URL_image`, `last_update`) VALUES (NULL, '".$send_data_array['user_uid']."', '".$send_data_array['user_nickname']."', '".$send_data_array['URL_image']."', CURRENT_TIME())";
+		$sql_query = "INSERT INTO `profile_users_data` (`user_id`, `user_uid`, `user_nickname`, `URL_avatarImage`, `last_update`) VALUES (NULL, '".$send_data_array['user_uid']."', '".$send_data_array['user_nickname']."', '".$send_data_array['URL_avatarImage']."', CURRENT_TIME())";
 		$result = mysqli_query($bd_link, $sql_query);
 		if(!$result)
 		{
@@ -117,7 +117,7 @@ if($send_data_array['error'] != 0)
 	$send_data_array['user_id'] = '';
 	$send_data_array['user_uid'] = '';
 	$send_data_array['user_nickname'] = '';
-	$send_data_array['URL_image'] = '';
+	$send_data_array['URL_avatarImage'] = '';
 }
 
 $ext = (string)json_encode($send_data_array);
