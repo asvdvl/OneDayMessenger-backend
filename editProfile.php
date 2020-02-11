@@ -95,6 +95,17 @@ echo $ext;
     //1 - only nickname
     //2 - only avatar
     //3 - all
-
-
+/*
+///////todo
+yes: add in and out arrays
+yes: add seterror function
+yes: parse phase 1: get data from PUT stream
+ do: parse phase 2: put data in work array
+ no: connect to db
+ no: change nickname
+ no: resize upload avatar
+ no: upload avatar file
+ no: errace all data if error
+yes: send all data to client
+*/
 ?>
