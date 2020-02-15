@@ -1,6 +1,5 @@
 <?php
 //header('Content-Type: application/json');
-
 $received_data_from_client = [
 'newNickname' => '',
 'editType' => 0,
@@ -14,7 +13,9 @@ $send_data_to_client = [
 'URL_avatarImage' => '',
 'APIVersion' => 'v0.0'
 ];
-    
+
+$uploaddir = '/web/vservers/messenger.asvdev.com/htdocs/data/avatars/';
+
 function setError($errorCode)
 {
 	global $send_data_to_client;
@@ -24,17 +25,33 @@ function setError($errorCode)
 	}
 }
 
-parse_str(file_get_contents("php://input"),$PUT_vars);
-#var_dump($PUT_vars);
-
-if($_SERVER['REQUEST_METHOD'] == "PUT")
+if($_SERVER['REQUEST_METHOD'] == "POST")
 {
-	if (isset($PUT_vars['editType']))
-	{
-        $PUT_vars['editType'] = (integer)$PUT_vars['editType']; 
-        if($PUT_vars['editType'] > 0 && $PUT_vars['editType'] <= 3)
+    phpinfo(32);
+    //get uid
+    if (isset($_POST['user_uid']))
+    {
+        if(strlen($_POST['user_uid']) == 40)
         {
-            $received_data_from_client['editType'] = $PUT_vars['editType'];
+            $received_data_from_client['user_uid'] = $_POST['user_uid'];
+        }
+        else
+        {
+            setError(3);
+        }
+    }
+	else
+	{
+		setError(1);
+    }
+
+    //get edit type
+	if (isset($_POST['editType']))
+	{
+        $_POST['editType'] = (integer)$_POST['editType']; 
+        if($_POST['editType'] > 0 && $_POST['editType'] <= 3)
+        {
+            $received_data_from_client['editType'] = $_POST['editType'];
         }
         else
         {
@@ -45,28 +62,15 @@ if($_SERVER['REQUEST_METHOD'] == "PUT")
 	{
 		setError(1);
 	}
- 
-    if (isset($PUT_vars['newNickname']))
-	{
-        if(strlen($PUT_vars['newNickname']) <= 64)
-        {
-            $received_data_from_client['newNickname'] = $PUT_vars['newNickname'];
-        }
-        else
-        {
-            setError(3);
-        }
-    }
-	else
-	{
-		setError(1);
-    }
     
-    if (isset($PUT_vars['user_uid']))
+    //get new nickname
+    if (isset($_POST['newNickname']) 
+        && ($received_data_from_client['editType'] == 1 
+        || $received_data_from_client['editType'] == 3))
 	{
-        if(strlen($PUT_vars['user_uid']) == 40)
+        if(strlen($_POST['newNickname']) <= 64)
         {
-            $received_data_from_client['user_uid'] = $PUT_vars['user_uid'];
+            $received_data_from_client['newNickname'] = $_POST['newNickname'];
         }
         else
         {
@@ -77,13 +81,25 @@ if($_SERVER['REQUEST_METHOD'] == "PUT")
 	{
 		setError(1);
     }
+
+    //get new avatar image
+    if (isset($_FILES['newAvatar'])
+        && ($received_data_from_client['editType'] == 1 
+        || $received_data_from_client['editType'] == 3))
+    {
+        
+    }
+    else
+    {
+        setError(1);
+    }
+   // && ($received_data_from_client['editType'] == 2 || $received_data_from_client['editType'] == 3))
+
 }
 else
 {
 	setError(2);
 }
-
-
 
 
 $ext = (string)json_encode($send_data_to_client);
@@ -99,8 +115,7 @@ echo $ext;
 ///////todo
 yes: add in and out arrays
 yes: add seterror function
-yes: parse phase 1: get data from PUT stream
- do: parse phase 2: put data in work array
+ do: POST data in work array
  no: connect to db
  no: change nickname
  no: resize upload avatar
