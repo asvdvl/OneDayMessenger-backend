@@ -3,7 +3,7 @@
 $received_data_from_client = [
 'newNickname' => '',
 'editType' => 0,
-'newAvatar' => '',
+'newAvatarPath' => '',
 'user_uid' => '',
 ];
     
@@ -27,7 +27,7 @@ function setError($errorCode)
 
 if($_SERVER['REQUEST_METHOD'] == "POST")
 {
-    phpinfo(32);
+    //phpinfo(32);
     //get uid
     if (isset($_POST['user_uid']))
     {
@@ -87,7 +87,18 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
         && ($received_data_from_client['editType'] == 1 
         || $received_data_from_client['editType'] == 3))
     {
-        
+        if($mimeContentType = exif_imagetype($_FILES['newAvatar']['tmp_name']))
+        {
+            if ($variable >= 1 && variable <= 3) {
+                $received_data_from_client['newAvatarPath'] = $_FILES['newAvatar']['tmp_name'];
+            }
+
+            
+        }      
+        else
+        {
+            setError(3); 
+        }
     }
     else
     {
@@ -105,18 +116,13 @@ else
 $ext = (string)json_encode($send_data_to_client);
 echo $ext;
 
-    //dock
-    //edittype - int 0-3
-    //0 - nothing
-    //1 - only nickname
-    //2 - only avatar
-    //3 - all
 /*
 ///////todo
 yes: add in and out arrays
 yes: add seterror function
- do: POST data in work array
+yes: POST data in work array
  no: connect to db
+ no: convert image
  no: change nickname
  no: resize upload avatar
  no: upload avatar file
