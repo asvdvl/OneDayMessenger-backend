@@ -1,15 +1,25 @@
-<!DOCTYPE html> 
-<html lang='ru'>
- <head>
-  <meta charset="utf-8">
-  <title>Запросы к API</title>
- </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Запросы к API</title>
+</head>
 <body>
-	<form method="POST" enctype="multipart/form-data" action="/api/st.php">
-    	<p><input type=text name=vvv></p>
-		<p><input type="text" name="xxx"></p>
+	<p>editProfile</p>
+	<form method="POST" enctype="multipart/form-data" action="/api/editProfile.php">
+		<p><input type="text" name="editType" value="3"></p>
+		<p><input type="text" name="user_uid" value="1234567890123456789012345678901234567890"></p>
+		<p><input type="text" name="newNickname" value="01010101010110"></p>
+		<p><input type="file" name="newAvatar"></p>
     	<input type=submit value=отправить>
-  	</form>
-
-
+	  </form>
+	  <p>sendMessage</p>
+	  <form method="POST" enctype="multipart/form-data" action="/api/sendMessage.php">
+		<p><input type="text" name="user_uid" value="1234567890123456789012345678901234567890"></p>
+		<p><input type="text" name="messadeBody"></p>
+    	<input type=submit value=отправить>
+	  </form>
 </body>
+</html>
