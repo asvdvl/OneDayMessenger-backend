@@ -1,13 +1,14 @@
 <?php
 //header('Content-Type: application/json');
 $received_data_from_client = [
+    'user_id' => '',
     'user_uid' => '',
     'messadeBody' => ''
     ];
         
 $send_data_to_client = [
     'error' => '0',
-    'APIVersion' => 'v0.0'
+    'APIVersion' => 'v0.1'
     ];    
 
 function setError($errorCode)
@@ -60,10 +61,55 @@ else
 	setError(2);
 }
 
-/*
-yes:parse post data 
- no:connect to bd 
- no:check valid user
- no:add message in db 
-*/
+###подкл. к бд
+try
+{
+	$bd_link = mysqli_connect("localhost", "messenger_backend_worker", "B9Z1VPNuvljoGTcm", "messenger_db");
+}
+catch (Exception $e)
+{
+	setError("100.".mysqli_connect_errno());
+}
+
+###поиск 
+try
+{
+	$sql_query = "SELECT `user_id` FROM `profile_users_data` WHERE `user_uid` = '".$received_data_from_client['user_uid']."'";
+	$result = mysqli_query($bd_link, $sql_query);
+	$result_parsing = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+	if($result_parsing)
+	{
+		$received_data_from_client['user_id'] = $result_parsing['user_id'];
+	}
+	else
+	{
+        setError(201);
+	}
+}
+catch (Exception $e)
+{
+	setError("101.".mysqli_connect_errno());
+}
+
+###Добавление сообщения 
+if ($received_data_from_client['error'] == 0) {
+    try
+    {
+	    $sql_query = "INSERT INTO `messages_data` (`message_uid`, `user_id`, `time`, `message_text`) VALUES (NULL, '".$received_data_from_client['user_id']."', current_timestamp(), '".$received_data_from_client['messadeBody']."')";
+	    $result = mysqli_query($bd_link, $sql_query);
+    
+	    if(!$result)
+	    {
+		    setError(104);
+	    }
+    }
+    catch (Exception $e)
+    {
+	    setError("105.".mysqli_connect_errno());
+    }
+}
+
+$ext = (string)json_encode($send_data_to_client);
+echo $ext;
  ?>
