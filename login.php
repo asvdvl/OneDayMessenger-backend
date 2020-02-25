@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: application/json');
 #переменныне
+$allowRegistration = False;
+
 $send_data_array = [ 
 'error' => "0",
 'new_profile' => false,
@@ -78,7 +80,12 @@ try
 	}
 	else
 	{
-		$send_data_array['new_profile'] = true;
+		#запрет регистрации
+		if ($allowRegistration) {
+			$send_data_array['new_profile'] = true;
+		} else {
+			setError(200);
+		}
 	}
 }
 catch (Exception $e)
