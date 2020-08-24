@@ -30,7 +30,7 @@ function setError($errorCode) {
 ###получение данных от клиента
 if($_SERVER['REQUEST_METHOD'] == "GET") {
 	if (isset($_GET['imei'])) {
-		$regexp = "/\d{40}$/";
+		$regexp = "/\d{15}$/";
 		$match = [];
 		if (preg_match($regexp, $_GET['imei'], $match)) {
 			$send_data_to_client['user_uid'] = sha1($match[0]);
