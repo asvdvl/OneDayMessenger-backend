@@ -113,8 +113,5 @@ if($send_data_to_client['error'] != 0) {
 }
 
 $ext = (string)json_encode($send_data_to_client);
-echo $ext;
-
-mysqli_free_result($result);
-mysqli_close($link);
+die($ext);
 ?>
