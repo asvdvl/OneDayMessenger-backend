@@ -64,10 +64,10 @@ catch (Exception $e) {
 try {
 	$sql_query_find_client = "SELECT `user_id` FROM `profile_users_data` WHERE `user_uid` = '".$received_data_from_client['user_uid']."'";
 	$result_find_client = mysqli_query($bd_link, $sql_query_find_client);
-	$result_parsing_add_message = mysqli_fetch_array($result_find_client, MYSQLI_ASSOC);
+	$result_parsing_find_client = mysqli_fetch_array($result_find_client, MYSQLI_ASSOC);
 
-	if($result_parsing_add_message) {
-		$received_data_from_client['user_id'] = $result_parsing_add_message['user_id'];
+	if($result_parsing_find_client) {
+		$received_data_from_client['user_id'] = $result_parsing_find_client['user_id'];
 	}
 	else {
         setError(201);
@@ -78,9 +78,9 @@ catch (Exception $e) {
 }
 
 ###Добавление сообщения 
-if ($received_data_from_client['error'] == 0) {
+if ($send_data_to_client['error'] == 0) {
     try {
-	    $sql_query_add_message = "INSERT INTO `messages_data` (`message_id`, `user_id`, `time`, `message_text`) VALUES (NULL, '".$received_data_from_client['user_id']."', current_timestamp(), '".$received_data_from_client['messadeBody']."')";
+	    $sql_query_add_message = "INSERT INTO `messages_data` (`message_id`, `user_id`, `time`, `message_text`) VALUES (NULL, '".$received_data_from_client['user_id']."', current_timestamp(), '".$received_data_from_client['messageBody']."')";
 	    $result_add_message = mysqli_query($bd_link, $sql_query_add_message);
     
 	    if(!$result_add_message) {
@@ -93,9 +93,5 @@ if ($received_data_from_client['error'] == 0) {
 }
 
 $ext = (string)json_encode($send_data_to_client);
-echo $ext;
-
-mysqli_free_result($result_get_messages);
-mysqli_free_result($result_find_client);
-mysqli_close($bd_link);
- ?>
+die($ext);
+?>
