@@ -78,9 +78,5 @@ if ($send_data_to_client['error'] == "0") {
 
 
 $ext = (string)json_encode($send_data_to_client);
-echo $ext;
-
-mysqli_free_result($result_get_messages);
-mysqli_free_result($result_find_client);
-mysqli_close($bd_link);
+die($ext);
 ?>
