@@ -133,8 +133,12 @@ if ($send_data_to_client['error'] == "0") {
         while($row = mysqli_fetch_array($result_get_messages, MYSQLI_ASSOC)) {
             $rows[] = $row;
         }
-    
-        $send_data_to_client['messages'] = $rows;
+		
+		$send_data_to_client['messages'] = null;
+		if(isset($rows))
+		{
+			$send_data_to_client['messages'] = $rows;
+		}
     }
     catch (Exception $e) {
         setError("101.".mysqli_connect_errno());
@@ -142,9 +146,5 @@ if ($send_data_to_client['error'] == "0") {
 } 
 
 $ext = (string)json_encode($send_data_to_client);
-echo $ext;
-
-mysqli_free_result($result_get_messages);
-mysqli_free_result($result_find_client);
-mysqli_close($bd_link);
+die($ext);
 ?>
